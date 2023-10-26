@@ -269,11 +269,31 @@ Run Spring Boot application with command: `mvn spring-boot:run`
 
 > Create a new course: http://localhost:8080/api/courses
 
+**Sample POST Request**
+
+```json
+{
+  "title": "test title",
+  "description": "testdescription",
+  "published": false
+}
+```
+
 > Delete All courses: http://localhost:8080/api/courses/
 
 > Delete A Single Course: http://localhost:8080/api/courses/1
 
 > Update A Single Course: http://localhost:8080/api/courses/1
+
+**Sample PUT Request**
+
+```json
+{
+  "title": "Updated test title",
+  "description": "Updated test description",
+  "published": true
+}
+```
 
 ## Create Dockerfile for Spring Boot App
 
@@ -342,3 +362,99 @@ services:
     ports:
       - $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
 ```
+
+## Components of Docker Compose File
+
+- course-app:
+    - `image`: final image name
+    - `build`: configuration options that are applied at build time that we defined in the _Dockerfile_ with relative
+      path
+    - `environment`: environmental variables that Spring Boot application uses
+    - `ports` : Inbound and outbound ports
+    - `depends_on`: dependency order, `mysql` is started before app
+- mysql:
+    - `image`: mysql image pull it from docker hub registry, if it is not available in the locally
+    - `env_file`: specify our .env path that we will create later
+    - `environment`: Specify the environment variables
+    - `ports`: Inbound and outbound ports
+
+## Docker Compose Environment variables
+
+In the service configuration, we utilized environmental variables specified within the `.env` file.
+Now we will create it.
+
+_.env_
+
+```properties
+MYSQLDB_USER=root
+MYSQLDB_ROOT_PASSWORD=dummypassword
+MYSQLDB_DATABASE=course-database
+MYSQLDB_LOCAL_PORT=3306
+MYSQLDB_DOCKER_PORT=3306
+SPRING_LOCAL_PORT=8080
+SPRING_DOCKER_PORT=8080
+```
+
+## Run the Spring Boot microservice with Docker Compose
+
+**NOTE: Before executing the Docker Compose command, it is imperative to initiate the Docker Desktop software.**
+
+To spin up the containers for both course-app and mysql database, execute the docker compose command given below.
+
+> docker compose up
+
+Docker will pull the MySQL and Maven images (if our machine does not have it before).
+
+The services can be run on the background with command:
+
+> docker compose up -d
+
+```logsyaml
+puneethsai@Puneeths-MacBook-Pro spring-boot-app-with-mysql % docker compose up -d
+[+] Running 12/2
+ ! course-app Warning                                                                                                                                                                                3.9s 
+ ✔ mysql 10 layers [⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿]      0B/0B      Pulled                                                                                                                                             115.0s 
+[+] Building 61.1s (7/8)                                                                                                                                                             docker:desktop-linux
+ => [course-app internal] load .dockerignore                                                                                                                                                         0.0s
+ => => transferring context: 680B                                                                                                                                                                    0.0s
+ => [course-app internal] load build definition from Dockerfile                                                                                                                                      0.1s
+ => => transferring dockerfile: 171B                                                                                                                                                                 0.0s
+ => [course-app internal] load metadata for docker.io/library/maven:3.8.5-openjdk-17                                                                                                                 2.7s
+ => [course-app 1/4] FROM docker.io/library/maven:3.8.5-openjdk-17@sha256:3a9c30b3af6278a8ae0007d3a3bf00fff80ec3ed7ae4eb9bfa1772853101549b                                                           0.0s
+ => [course-app internal] load build context                                                                                                                                                         0.1s
+ => => transferring context: 18.49kB                                                                                                                                                                 0.1s
+ => CACHED [course-app 2/4] WORKDIR /spring-boot-app-with-mysql                                                                                                                                      0.0s
+ => [course-app 3/4] COPY . .                                                                                                                                                                        0.3s
+ => [course-app 4/4] RUN mvn clean install -DskipTests                                                                                                                                              90.1s
+ => [course-app] exporting to image                                                                                                                                                                  1.7s
+ => => exporting layers                                                                                                                                                                              1.6s
+ => => writing image sha256:8d81a4f06e3260805d7d6abb9cb17eea11c1e954fc09b6de2d823b78856a315e                                                                                                         0.0s 
+ => => naming to docker.io/library/spring-boot-app-with-mysql-image                                                                                                                                  0.0s 
+[+] Running 3/3                                                                                                                                                                                           
+ ✔ Network spring-boot-app-with-mysql_default         Created                                                                                                                                        0.7s 
+ ✔ Container spring-boot-app-with-mysql-mysql-1       Started                                                                                                                                        0.3s 
+ ✔ Container spring-boot-app-with-mysql-course-app-1  Started                                                                                                                                        0.1s 
+```
+
+_**NOTE: EVEN THOUGH APPLICATION SAYING IT IS STARTED WHEN YOU ACCESS IF IT IS NOT WORKING, PLEASE EXECUTE DOCKER
+COMPOSE UP AGAIN**_
+> docker compose up -d
+
+```logs
+[+] Building 0.0s (0/0)                                                                                                                                                              docker:desktop-linux
+[+] Running 2/2
+ ✔ Container spring-boot-app-with-mysql-mysql-1       Running                                                                                                                                        0.0s 
+ ✔ Container spring-boot-app-with-mysql-course-app-1  Started                                                                                                                                        0.0s
+```
+
+## Containers Running in Docker Desktop
+
+![Image](./images/dockerdesktop.png "Docker Desktop")
+
+## Run & Test
+
+Using OpenAPI Documentation, we'll be able to access all the operations, please access the below URL
+
+> http://localhost:8080/swagger-ui/index.html
+
+![Image](./images/swagger.png "Swagger OpenAPI")

@@ -168,6 +168,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:8081") // to allow course-app frontend application
 @RestController
 @RequestMapping("/api/courses")
 public class CourseController {

@@ -4,6 +4,9 @@ pipeline {
     environment {
         // Define any environment variables if needed
         MAVEN_HOME = tool name: 'Maven 3.9.8', type: 'maven'
+        DOCKER_IMAGE = "bsmahi/spring-boot-app-with-mysql"
+        DOCKER_TAG = "latest"
+        DOCKER_CREDENTIALS_ID = "DockerHubCredentials"
     }
 
     stages {
@@ -28,13 +31,34 @@ pipeline {
             }
         }
 
-        // stage('Deploy') {
-        //     steps {
-        //         // Deploy to an environment (e.g., staging or production)
-        //         // You can customize this step based on your deployment strategy
-        //         sh "${MAVEN_HOME}/bin/mvn deploy"
-        //     }
-        // }
+        stage('Build Docker Image') {
+             steps {
+                script {
+                    docker.build("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}")
+                }
+             }
+        }
+
+        stage('Push to Docker Hub') {
+              steps {
+                script {
+                    docker.withRegistry('', "${env.DOCKER_CREDENTIALS_ID}") {
+                        docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").push()
+                    }
+                }
+              }
+         }
+
+         stage('Docker Scout Analysis') {
+             steps {
+                 script {
+                     def image = "${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
+                     sh "docker scout cves ${image}"
+                 }
+             }
+         }
+
+
     }
 
     post {

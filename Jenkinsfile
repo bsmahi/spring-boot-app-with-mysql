@@ -31,6 +31,20 @@ pipeline {
             }
         }
 
+        stage('Install Docker') {
+            steps {
+                script {
+                    sh '''
+                    if ! command -v docker &> /dev/null
+                    then
+                        apt-get update
+                        apt-get install -y docker.io
+                    fi
+                    '''
+                }
+            }
+        }
+
         stage('Build Docker Image') {
              steps {
                 sh """

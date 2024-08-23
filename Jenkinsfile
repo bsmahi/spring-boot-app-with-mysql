@@ -37,8 +37,8 @@ pipeline {
                     sh '''
                     if ! command -v docker &> /dev/null
                     then
-                        apt-get update
-                        apt-get install -y docker.io
+                        sudo apt-get update
+                        sudo apt-get install -y docker.io
                     fi
                     '''
                 }

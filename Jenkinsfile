@@ -6,7 +6,7 @@ pipeline {
         MAVEN_HOME = tool name: 'Maven 3.9.8', type: 'maven'
         DOCKER_IMAGE = "bsmahi/spring-boot-app-with-mysql"
         DOCKER_TAG = "latest"
-        DOCKER_CREDENTIALS_ID = "DockerHubCredentials"
+        DOCKER_CREDENTIALS_ID = credentials('DockerHubCredentials')
     }
 
     stages {
@@ -33,18 +33,21 @@ pipeline {
 
         stage('Build Docker Image') {
              steps {
-                script {
-                    docker.build("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}")
-                }
+                sh """
+                 docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} .
+                """
              }
         }
 
         stage('Push to Docker Hub') {
               steps {
                 script {
-                    docker.withRegistry('', "${env.DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").push()
-                    }
+                    withCredentials([usernamePassword(credentialsId: "${env.DOCKER_CREDENTIALS_ID}", passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh """
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                        docker push ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}
+                        """
+                   }
                 }
               }
          }
@@ -52,8 +55,9 @@ pipeline {
          stage('Docker Scout Analysis') {
              steps {
                  script {
-                     def image = "${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
-                     sh "docker scout cves ${image}"
+                      sh """
+                       docker scout cves ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}
+                      """
                  }
              }
          }

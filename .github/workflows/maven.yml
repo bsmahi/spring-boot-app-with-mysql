@@ -54,7 +54,7 @@ jobs:
           to-env: production
           ignore-unchanged: true
           only-severities: critical,high
-          organization: bsmlabs
+          organization: bsmahi
 
     - name: Analyze Docker image with Docker Scout
       run: docker scout cves ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest 

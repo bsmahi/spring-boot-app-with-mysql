@@ -47,8 +47,11 @@ jobs:
           docker tag ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest
   
-    - name: Analyze Docker image with Docker Scout
-      run: docker scout cves ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest 
+    - name: Run Docker Scout Action
+      uses: docker/scout-action@v1
+      with:
+          token: ${{ secrets.DOCKER_SCOUT_TOKEN }}  # Make sure you have this token set in your secrets
+          image: ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest 
     
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph

@@ -46,16 +46,7 @@ jobs:
       run: |
           docker tag ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest
-    - name: Install Docker Scout
-      uses: docker/scout-action@v1
-      with:
-          command: compare
-          image: ${{ steps.meta.outputs.tags }}
-          to-env: production
-          ignore-unchanged: true
-          only-severities: critical,high
-          organization: bsmahi
-
+  
     - name: Analyze Docker image with Docker Scout
       run: docker scout cves ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest 
     

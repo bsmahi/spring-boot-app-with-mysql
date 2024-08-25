@@ -29,7 +29,29 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn package -DskipTests
+      
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
+    - name: Build Docker image
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:${{ github.sha }} .      
+    
+    - name: Push Docker image to Docker Hub
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:${{ github.sha }}
 
+    - name: Tag the image with 'latest'
+      run: |
+          docker tag ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest
+    - name: Install Docker Scout
+      run: docker scout install
+
+    - name: Analyze Docker image with Docker Scout
+      run: docker scout cves ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest 
+    
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
       uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6

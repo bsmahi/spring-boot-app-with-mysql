@@ -50,6 +50,8 @@ jobs:
     - name: Run Docker Scout Action
       uses: docker/scout-action@v1
       with:
+          command: compare
+          organization: bsmahi
           token: ${{ secrets.DOCKER_SCOUT_TOKEN }}  # Make sure you have this token set in your secrets
           image: ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest 
     

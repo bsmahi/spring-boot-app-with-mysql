@@ -55,13 +55,18 @@ jobs:
           # token: ${{ secrets.DOCKER_SCOUT_TOKEN }}  # Make sure you have this token set in your secrets
           image: ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest
 
-    - name: Run Trivy vulnerability scanner
+    - name: Run Trivy Vulnerability Scanner
       uses: aquasecurity/trivy-action@0.20.0
       with:
           image-ref: 'docker.io/bsmahi/spring-boot-app-mysql-ga:${{ github.sha }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
-
+          
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+          sarif_file: 'trivy-results.sarif'
+          
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
       uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6

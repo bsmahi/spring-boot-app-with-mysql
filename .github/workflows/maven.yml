@@ -56,7 +56,7 @@ jobs:
           image: ${{ secrets.DOCKER_USERNAME }}/spring-boot-app-mysql-ga:latest
 
     - name: Run Trivy Vulnerability Scanner
-      uses: aquasecurity/trivy-action@0.20.0
+      uses: aquasecurity/trivy-action@<commit-sha>
       with:
           image-ref: 'docker.io/bsmahi/spring-boot-app-mysql-ga:${{ github.sha }}'
           format: 'sarif'
